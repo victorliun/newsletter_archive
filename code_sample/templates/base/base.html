@@ -1,0 +1,94 @@
+{% load url from future %}
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Sheng's{% endblock %}</title>
+    {% if settings.DEBUG %}<meta http-equiv="pragma" content="no-cache"/>{% endif %}
+    <meta name="robots" content="index,follow">
+    <meta name="author" content="{{ blog_config.meta_author }}">
+    <meta name="keywords" content="{{ blog_config.meta_keywords }}">
+    <meta name="description" content="{% block meta_description %}{{ blog_config.meta_description }}{% endblock %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" href="{{ STATIC_URL }}images/siteico.png">
+    <link rel="apple-touch-icon" type="image/png" href="{{ STATIC_URL }}images/apple_touch_logo.png">
+    <link href="{{ STATIC_URL }}css/normalize.css" rel="Stylesheet"/>
+    <link href="{{ STATIC_URL }}css/site.css" rel="Stylesheet"/>
+    <!-- Using site.media.css when screen width reduced less than 400px; 
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/site.media.css" media="only screen and (min-width:400px;)"> -->
+    <link href="{{ STATIC_URL }}css/jquery-ui/1.10.3/themes/smoothness/jquery-ui.css" rel="Stylesheet"/>
+    {% block extracss %}{% endblock %}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery/1.10.3/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui/1.10.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.lavalamp-1.4.js"></script>
+
+    <!--Fancybox, Optionally add helpers - button, thumbnail and/or media -->
+    <script type="text/javascript" src="{{ STATIC_URL }}js/fancybox-2.1.5/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+    <link rel="stylesheet" href="{{ STATIC_URL }}js/fancybox-2.1.5/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}js/fancybox-2.1.5/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" type="text/css" media="screen" />
+    <script type="text/javascript" src="{{ STATIC_URL}}js/fancybox-2.1.5/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+    <script type="text/javascript" src="{{ STATIC_URL}}js/fancybox-2.1.5/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script>
+    {% block extrajs %}{% endblock %}
+
+  </head>
+  <body>
+    <header id="site_head">
+      <div class="width960">
+        <div class="site_logo clearfix"><a href="/home"><img src="{{STATIC_URL}}images/sitelogo.png"/></a></div>
+        <h1 id="site_title">Blog Of <span class="multiple_text_shadow">Memory</span></h1>
+        <nav class="navigation">
+          <ul>
+            <li id="home" class=".backLava"><a href="/home">Home</a></li>
+            <li id="travel"><a href="/travel">Travel</a></li>
+            <li id="tech"><a href="/tech">Tech</a></li>
+            <li id="light"><a href="/light">Light</a></li>
+            <li id="recepe"><a href="/recepe">Recepe</a></li>
+          </ul>
+        </nav>
+      </div>
+      {% if not request.user.username %}
+      <div id="login"><a href="/accounts/login?next={{request.path}}">Login</a>/
+        <a href="/accounts/register?next={{request.path}}">Register</a></div>
+      {% else %}
+      <div id="userinfo">
+        <a href="/accounts/profile">{{ request.user.username }} </a>/
+        <a href="/accounts/logout">Logout</a>
+      </div>
+      {% endif %}
+    </header>
+
+    <section id="container">
+    {% block content %}
+      <article id="article_id" class="articles">
+        <header>article title</header>
+        <div class="article_brief">This Article talks about travel experience to Christchurch</div>
+      </article>
+      <article id="article_id" class="articles">
+        <header>article title</header>
+        <div class="article_brief">This Article talks about travel experience to Christchurch</div>
+      </article>
+      <article id="article_id" class="articles">
+        <header>article title</header>
+        <div class="article_brief">This Article talks about travel experience to Christchurch</div>
+      </article>
+    {% endblock %}
+    </section>
+    
+    <!-- aside id="calendar_view">
+      <div class="calendar">calendar</div>
+    </aside>
+    <aside id="tags">Tags here</aside>
+    <aside id="table_of_content">Contents</aside -->
+
+    <footer id="site_foot">
+      <div class="width960">
+        <div class="social_links"></div>
+        <div id="email_addr"><span>Any advice will be appriciated. </span><address>Email me at <a href="mailto:victor.ns.liu@outlook.com">victor.ns.liu@outlook.com</a></address></div>
+      </div>
+    </footer>
+  </body>
+</html>

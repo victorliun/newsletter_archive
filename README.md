@@ -1,4 +1,4 @@
 newsletter_archive
 ==================
 
-Newsletters archive project
+Repository for newsletter archive project.
