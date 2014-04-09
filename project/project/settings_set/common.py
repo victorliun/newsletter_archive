@@ -44,7 +44,7 @@ THIRD_PART_APPS = (
 
 
 LOCAL_APPS = (
-#    'apps.archive',
+    'apps.archive',
 )
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PART_APPS + LOCAL_APPS
