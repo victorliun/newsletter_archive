@@ -1,8 +1,15 @@
 from django.contrib import admin
 
-from models import *
+from .models import *
+from .forms import *
 
 class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
+    """
+    admin for NewsletterArchiveWIP
+    """
+    form = NewsletterArchiveWIPForm
+    readonly_fields = ('status', 'cloudinary_image_url', 'header',
+        'clouninary_image_id', 'image_path_from_phantomjs')
     list_filter = ('status',)
     list_display = ['company', 'status', 'cloudinary_image_url', 
         'clouninary_image_id', 'added_by']
@@ -16,11 +23,37 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
         queryset.update(status='5')
     make_reviewed.short_description = "Mark selected newsletters as reviewed"
 
+class NewsletterTagAdmin(admin.ModelAdmin):
+    """
+    Admin for NewsletterTag
+    """
+    list_display = ['name', 'newsletter', 'from_company']
+    readonly_fields = ('name', 'newsletter', 'from_company')
+
+    def has_add_permission(self, request):
+        return False
+
+class CompanySubdomainAdmin(admin.ModelAdmin):
+    """
+    Admin for CompanySubdomain
+    """
+    def has_add_permission(self, request):
+        return False  
+
+class CompanyDetailAdmin(admin.ModelAdmin):
+    """
+    Admin for CompanyDetail
+    """
+    
+    form = CompanyDetailForm
+
+      
 
 # Register your models here.
 admin.site.register(NewsletterArchive)
 admin.site.register(NewsletterArchiveWIP, NewsletterArchiveWIPAdmin)
-admin.site.register(CompanyDetail)
-admin.site.register(NewsletterTag)
+admin.site.register(CompanyDetail, CompanyDetailAdmin)
+admin.site.register(NewsletterTag, NewsletterTagAdmin)
 admin.site.register(CompanyStatstistics)
+admin.site.register(CompanySubdomain, CompanySubdomainAdmin)
 

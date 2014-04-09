@@ -40,6 +40,7 @@ DEFAULT_APPS = (
 
 THIRD_PART_APPS = (
     'south',
+    'djcelery',
 )
 
 

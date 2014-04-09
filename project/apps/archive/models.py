@@ -27,8 +27,8 @@ class CompanyDetail(models.Model):
     
     company_name = models.CharField(max_length=20)
     company_county = CountryField()
-    domain_names = models.CharField(max_length=100)
-    subdomain_names = models.CharField(max_length=100, blank=True)
+    domain_names = models.CharField(max_length=255)
+    subdomain_names = models.CharField(max_length=255, blank=True)
     company_tags = models.CharField(max_length=255)
     added_by = models.ForeignKey(User, related_name="company_added_by")
     unsubscribe_url = models.URLField(blank=True)
@@ -52,6 +52,14 @@ class CompanyDetail(models.Model):
             self.slug = slugify(unicode(self.company_name))
 
         super(CompanyDetail, self).save(*args, **kwargs)
+
+        for subdomain in subdomains:
+            if not CompanySubdomain.objects.filter(subdomain=subdomain).count():
+                CompanySubdomain.objects.create(subdomain=subdomain, company=self)
+
+        for tag in self.company_tags:
+            if not NewsletterTag.objects.filter(name=tag).count():
+                NewsletterTag.objects.create(from_company=self, name=tag)
     
     @property
     def domains(self):
@@ -83,13 +91,19 @@ NEWSLETTER_ARCHIVE_STATUS = (
 class NewsletterArchive(models.Model):
     """
     Model Name: NewsletterArchive, store follow information of a newsletter archive.
-        1. publish_date: On which date this newsletter archived
-        2. company: Which company this newsletter come from
-        3. added_by: Who archived this newsletter
-        4. cloudinary_image_url: the image url from cloudinary where store newsletter archive images
-        5. clouninary_image_id: the image url from cloudinary where store newsletter archive images
-        6. status: indicates which status this newsletter archive is in. for this table this is all 6.
+        > subject: newsletter subject
+        > sender: email address of sender
+        > header: newsletter email's head information
+        > publish_date: On which date this newsletter archived
+        > company: Which company this newsletter come from
+        > added_by: Who archived this newsletter
+        > cloudinary_image_url: the image url from cloudinary where store newsletter archive images
+        > clouninary_image_id: the image url from cloudinary where store newsletter archive images
+        > status: indicates which status this newsletter archive is in. for this table this is all 6.
     """
+    subject = models.CharField(max_length=255)
+    sender = models.EmailField()
+    header = models.TextField()
     publish_date = models.DateField(auto_now_add=True)
     company = models.ForeignKey(CompanyDetail, related_name="company")
     added_by = models.ForeignKey(User, related_name="added_by")
@@ -106,18 +120,24 @@ class NewsletterArchive(models.Model):
 class NewsletterArchiveWIP(models.Model):
     """
     Model Name: NewsletterArchiveWIP, store follow information of a newsletter archive.
-        1. publish_date: On which date this newsletter archived
-        2. company: Which company this newsletter come from
-        3. added_by: Who archived this newsletter
-        4. cloudinary_image_url: the image url from cloudinary where store newsletter archive images
-        5. clouninary_image_id: the image url from cloudinary where store newsletter archive images
-        6. status: indicates which status this newsletter archive is in.
-        7. tags: tag this newsletter
-        8. url: the original url of newsletter
-        9. image_path_from_phantomjs: the temprary path where save the image
-        10. reviewed: if this record reviewed by editor or admin.
+        > subject: newsletter subject
+        > publish_date: On which date this newsletter archived
+        > sender: email address of sender
+        > header: newsletter email's head information
+        > company: Which company this newsletter come from
+        > added_by: Who archived this newsletter
+        > cloudinary_image_url: the image url from cloudinary where store newsletter archive images
+        > clouninary_image_id: the image url from cloudinary where store newsletter archive images
+        > status: indicates which status this newsletter archive is in.
+        > tags: tag this newsletter
+        > url: the original url of newsletter
+        > image_path_from_phantomjs: the temprary path where save the image
+        > reviewed: if this record reviewed by editor or admin.
     """
+    subject = models.CharField(max_length=255)
     publish_date = models.DateField(auto_now_add=True)
+    sender = models.EmailField()
+    header = models.TextField()
     company = models.ForeignKey(CompanyDetail, related_name="wip_company", null=True, blank=True)
     added_by = models.ForeignKey(User, related_name="wip_added_by")
     cloudinary_image_url = models.URLField(blank=True)
@@ -165,14 +185,15 @@ class NewsletterTag(models.Model):
         newsletter: where is this tag from 
     """
     name = models.CharField(max_length=40, null=False, unique=True)   
-    newsletter = models.ForeignKey(NewsletterArchiveWIP)
-
+    newsletter = models.ForeignKey(NewsletterArchiveWIP, null=True)
+    from_company = models.ForeignKey(CompanyDetail, null=True)
     
     def __unicode__(self):
         """
         Return a string as the description of this tag.
         """
         return u"Tag: %s" %self.name
+
 
 class CompanyStatstistics(models.Model):
     """
@@ -197,3 +218,20 @@ class CompanyStatstistics(models.Model):
     
     class Meta:
         verbose_name_plural = 'Company Statstistics'
+
+
+class CompanySubdomain(models.Model):
+    """
+    Models for Company subdomains.
+        > company: which company.
+        > subdomain: subdomain of the company.
+    """
+
+    company = models.ForeignKey(CompanyDetail, related_name="company_subdomain")
+    subdomain = models.URLField()
+
+    def __unicode__(self):
+        """
+        return string of company subdomain.
+        """
+        return u"%s - %s"%(self.company, self.subdomain)
