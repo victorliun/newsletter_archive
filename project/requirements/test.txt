@@ -1,0 +1,6 @@
+# requirements/test.txt
+-r common.txt
+django-coverage==1.2.4
+django-nose==1.2
+mock==1.0.1
+nosexcover==1.0.8
