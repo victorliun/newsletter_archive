@@ -26,7 +26,7 @@ class CompanyDetail(models.Model):
     """
     
     company_name = models.CharField(max_length=20)
-    company_county = CountryField()
+    company_country = CountryField()
     domain_names = models.CharField(max_length=255)
     subdomain_names = models.CharField(max_length=255, blank=True)
     company_tags = models.CharField(max_length=255)
@@ -53,7 +53,7 @@ class CompanyDetail(models.Model):
 
         super(CompanyDetail, self).save(*args, **kwargs)
 
-        for subdomain in subdomains:
+        for subdomain in self.subdomains:
             if not CompanySubdomain.objects.filter(subdomain=subdomain).count():
                 CompanySubdomain.objects.create(subdomain=subdomain, company=self)
 
@@ -76,6 +76,14 @@ class CompanyDetail(models.Model):
         """
 
         return map(lambda x: x.strip(), self.subdomain_names.split(','))        
+
+    @property
+    def tags(self):
+        """
+        Return a list of domains. domain_names field is a comma seperated string.
+        """
+
+        return map(lambda x: x.strip(), self.company_tags.split(','))
 
 #NEWSLETTER_ARCHIVE_STATUS indicates each status of newsletter archive, different newsletter will 
 #be processed by diffirent jobs.

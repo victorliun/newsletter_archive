@@ -37,6 +37,7 @@ class CompanySubdomainAdmin(admin.ModelAdmin):
     """
     Admin for CompanySubdomain
     """
+    list_display = ['company', 'subdomain',]
     def has_add_permission(self, request):
         return False  
 
@@ -44,10 +45,9 @@ class CompanyDetailAdmin(admin.ModelAdmin):
     """
     Admin for CompanyDetail
     """
-    
+    list_display = ['company_name', 'subdomain_names',  'company_country']
     form = CompanyDetailForm
 
-      
 
 # Register your models here.
 admin.site.register(NewsletterArchive)
