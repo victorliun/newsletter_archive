@@ -1,3 +1,6 @@
+"""
+Archive App: models.
+"""
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
@@ -13,16 +16,16 @@ class CompanyDetail(models.Model):
     Model of table: CompanyDetail.
     This table keep recording details of eche company.
     Fields include:
-        id: default field
-        company_name: the name of company
-        company_county: which country this company belongs to
-        domain_names: the domain names that company have
-        company_tags: tags this company
-        added_by: who add this entry
-        unsubscribe_url: the url used to unsubscribe it
-        subscribe_url: the url used to subscribe it
-        unsubscribe_email: the email used to unsubscribe it
-        slug: the readable url for each record intead of using record's id
+        > id: default field
+        > company_name: the name of company
+        > company_county: which country this company belongs to
+        > domain_names: the domain names that company have
+        > company_tags: tags this company
+        > added_by: who add this entry
+        > unsubscribe_url: the url used to unsubscribe it
+        > subscribe_url: the url used to subscribe it
+        > unsubscribe_email: the email used to unsubscribe it
+        > slug: the readable url for each record intead of using record's id
     """
     
     company_name = models.CharField(max_length=20)
@@ -43,6 +46,7 @@ class CompanyDetail(models.Model):
 
         return u"Company:%d, %s - %s" %(self.pk, self.company_name, self.domain_names)
 
+
     def save(self, *args, **kwargs):
         """
         First this generate a string for slug field if it's null.
@@ -54,11 +58,11 @@ class CompanyDetail(models.Model):
         super(CompanyDetail, self).save(*args, **kwargs)
 
         for subdomain in self.subdomains:
-            if not CompanySubdomain.objects.filter(subdomain=subdomain).count():
+            if subdomain and not CompanySubdomain.objects.filter(subdomain__iexact=subdomain).count():
                 CompanySubdomain.objects.create(subdomain=subdomain, company=self)
 
-        for tag in self.company_tags:
-            if not NewsletterTag.objects.filter(name=tag).count():
+        for tag in self.tags:
+            if not NewsletterTag.objects.filter(name__iexact=tag).count():
                 NewsletterTag.objects.create(from_company=self, name=tag)
     
     @property
@@ -74,8 +78,10 @@ class CompanyDetail(models.Model):
         """
         Return a list of subdomains. subdomain_names field is a comma seperated string.
         """
-
-        return map(lambda x: x.strip(), self.subdomain_names.split(','))        
+        if self.subdomain_names:
+            return map(lambda x: x.strip(), self.subdomain_names.split(','))        
+        else:
+            return []
 
     @property
     def tags(self):
@@ -106,7 +112,7 @@ class NewsletterArchive(models.Model):
         > company: Which company this newsletter come from
         > added_by: Who archived this newsletter
         > cloudinary_image_url: the image url from cloudinary where store newsletter archive images
-        > clouninary_image_id: the image url from cloudinary where store newsletter archive images
+        > cloudinary_image_id: the image url from cloudinary where store newsletter archive images
         > status: indicates which status this newsletter archive is in. for this table this is all 6.
     """
     subject = models.CharField(max_length=255)
@@ -116,7 +122,7 @@ class NewsletterArchive(models.Model):
     company = models.ForeignKey(CompanyDetail, related_name="company")
     added_by = models.ForeignKey(User, related_name="added_by")
     cloudinary_image_url = models.URLField(blank=True)
-    clouninary_image_id = models.IntegerField(blank=True, null=True)
+    cloudinary_image_id = models.CharField(max_length=40, blank=True, null=True)
     status = models.CharField(max_length='1', choices=NEWSLETTER_ARCHIVE_STATUS, default='6')
 
     def __unicode__(self):
@@ -135,7 +141,7 @@ class NewsletterArchiveWIP(models.Model):
         > company: Which company this newsletter come from
         > added_by: Who archived this newsletter
         > cloudinary_image_url: the image url from cloudinary where store newsletter archive images
-        > clouninary_image_id: the image url from cloudinary where store newsletter archive images
+        > cloudinary_image_id: the image url from cloudinary where store newsletter archive images
         > status: indicates which status this newsletter archive is in.
         > tags: tag this newsletter
         > url: the original url of newsletter
@@ -149,7 +155,7 @@ class NewsletterArchiveWIP(models.Model):
     company = models.ForeignKey(CompanyDetail, related_name="wip_company", null=True, blank=True)
     added_by = models.ForeignKey(User, related_name="wip_added_by")
     cloudinary_image_url = models.URLField(blank=True)
-    clouninary_image_id = models.IntegerField(blank=True, null=True)
+    cloudinary_image_id = models.CharField(max_length=40, blank=True, null=True)
     status = models.CharField(max_length='1', choices=NEWSLETTER_ARCHIVE_STATUS, default='1')
     newsletter_tags = models.CharField(max_length=255)
     url = models.URLField()
@@ -177,7 +183,7 @@ class NewsletterArchiveWIP(models.Model):
         
         super(NewsletterArchiveWIP, self).save(*args, **kwargs)
         for tag in self.tags:
-            if not NewsletterTag.objects.filter(name=tag).count():
+            if not NewsletterTag.objects.filter(name__iexact=tag).count():
                 NewsletterTag.objects.create(newsletter=self, name=tag)
 
     class Meta:
@@ -188,9 +194,9 @@ class NewsletterTag(models.Model):
     """
     Model for newslettertag. thest tags generated from company tags field and 
     newsletter tags fields.
-        Id: auto increase
-        name: tag's name, Must unique
-        newsletter: where is this tag from 
+        > Id: auto increase
+        > name: tag's name, Must unique
+        > newsletter: where is this tag from 
     """
     name = models.CharField(max_length=40, null=False, unique=True)   
     newsletter = models.ForeignKey(NewsletterArchiveWIP, null=True)
@@ -207,10 +213,10 @@ class CompanyStatstistics(models.Model):
     """
     Model for CompanyStatstistics: 
     fields:
-        1. company: associated to CompanyDetail.
-        2. newsletter_archived: how many Newsletter archived.
-        3. newsletter_views: how many newsletter viewed.
-        4. last_update: last_update time.
+        > company: associated to CompanyDetail.
+        > newsletter_archived: how many Newsletter archived.
+        > newsletter_views: how many newsletter viewed.
+        > last_update: last_update time.
     """
     company = models.OneToOneField(CompanyDetail, primary_key=True, related_name="companystatstistics")
     newsletter_archived = models.IntegerField(default=0)

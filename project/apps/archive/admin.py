@@ -1,7 +1,27 @@
+"""
+archive App: admins
+"""
 from django.contrib import admin
 
 from .models import *
 from .forms import *
+
+class NewsletterArchiveAdmin(admin.ModelAdmin):
+    """
+    admin for NewsletterArchive
+    """
+    readonly_fields = ('status', 'cloudinary_image_url', 'header',
+        'cloudinary_image_id',)
+
+    list_display = ['subject', 'get_company', 'status', 'cloudinary_image_url', 
+        'cloudinary_image_id', 'added_by']
+
+    def get_company(self, obj):
+        return obj.company.company_name
+    get_company.short_description = 'company'
+
+    def has_add_permission(self, request):
+        return False  
 
 class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
     """
@@ -9,11 +29,15 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
     """
     form = NewsletterArchiveWIPForm
     readonly_fields = ('status', 'cloudinary_image_url', 'header',
-        'clouninary_image_id', 'image_path_from_phantomjs')
+        'cloudinary_image_id', 'image_path_from_phantomjs')
     list_filter = ('status',)
-    list_display = ['company', 'status', 'cloudinary_image_url', 
-        'clouninary_image_id', 'added_by']
+    list_display = ['subject', 'get_company', 'status', 'image_path_from_phantomjs', 'cloudinary_image_url', 
+        'cloudinary_image_id', 'added_by']
     actions = ["make_reviewed"]
+
+    def get_company(self, obj):
+        return obj.company.company_name
+    get_company.short_description = 'company'
 
     def make_reviewed(modeladmin, request, queryset):
         """
@@ -37,7 +61,12 @@ class CompanySubdomainAdmin(admin.ModelAdmin):
     """
     Admin for CompanySubdomain
     """
-    list_display = ['company', 'subdomain',]
+    list_display = ['get_company', 'subdomain',]
+    
+    def get_company(self, obj):
+        return obj.company.company_name
+    get_company.short_description = 'company'
+
     def has_add_permission(self, request):
         return False  
 
@@ -45,12 +74,12 @@ class CompanyDetailAdmin(admin.ModelAdmin):
     """
     Admin for CompanyDetail
     """
-    list_display = ['company_name', 'subdomain_names',  'company_country']
+    list_display = ['company_name', 'domain_names', 'subdomain_names',  'company_country']
     form = CompanyDetailForm
 
 
 # Register your models here.
-admin.site.register(NewsletterArchive)
+admin.site.register(NewsletterArchive, NewsletterArchiveAdmin)
 admin.site.register(NewsletterArchiveWIP, NewsletterArchiveWIPAdmin)
 admin.site.register(CompanyDetail, CompanyDetailAdmin)
 admin.site.register(NewsletterTag, NewsletterTagAdmin)
