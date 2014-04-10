@@ -16,3 +16,4 @@ cms/django
 #*#
 *~
 project/static/admin
+htmlcov
