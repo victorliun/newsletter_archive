@@ -117,7 +117,6 @@ class NewsletterArchive(models.Model):
     """
     subject = models.CharField(max_length=255)
     sender = models.EmailField()
-    header = models.TextField()
     publish_date = models.DateField(auto_now_add=True)
     company = models.ForeignKey(CompanyDetail, related_name="company")
     added_by = models.ForeignKey(User, related_name="added_by")
