@@ -14,7 +14,7 @@ class CompanyDetailForm(forms.ModelForm):
     Form for CompanyDetail models
     """
 
-    def _clean(self):
+    def clean(self):
         """
         Clean company_tags, subdomain_names and domain_namesfields
         """
@@ -32,8 +32,10 @@ class CompanyDetailForm(forms.ModelForm):
             """
         pa = re.compile(pattern, re.VERBOSE)
         if not re.search(pa, self.cleaned_data.get('domain_names', '')):
-            raise forms.ValidationError("Multiple domains must be separated by comma, invalid domains")
-        if not re.search(pa, self.cleaned_data.get('subdomain_names', '')):
+            raise forms.ValidationError("Multiple domains must be separated by comma, invalid domains,%s"\
+                %self.cleaned_data.get('domain_names',''))
+        if self.cleaned_data.get('subdomain_names', '') and \
+            not re.search(pa, self.cleaned_data.get('subdomain_names', '')):
             raise forms.ValidationError("Multiple subdomains must be separated by comma, invalid subdomains")
 
         tag_pa = re.compile(r"^([A-Za-z0-9\s-]+[,]?)+$")
