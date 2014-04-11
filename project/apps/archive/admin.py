@@ -10,7 +10,7 @@ class NewsletterArchiveAdmin(admin.ModelAdmin):
     """
     admin for NewsletterArchive
     """
-    readonly_fields = ('status', 'cloudinary_image_url', 'header',
+    readonly_fields = ('status', 'cloudinary_image_url', 
         'cloudinary_image_id',)
 
     list_display = ['subject', 'get_company', 'status', 'cloudinary_image_url', 
@@ -36,7 +36,10 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
     actions = ["make_reviewed"]
 
     def get_company(self, obj):
-        return obj.company.company_name
+        if obj.company:
+            return obj.company.company_name
+        else:
+            return None
     get_company.short_description = 'company'
 
     def make_reviewed(modeladmin, request, queryset):

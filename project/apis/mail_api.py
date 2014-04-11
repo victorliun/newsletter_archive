@@ -31,7 +31,7 @@ class ZMailAPI():
         """
         return self.mail.select(box)
 
-    def search(self, criteria="ALL"):
+    def search(self, criteria="(UNSEEN)"):
         """
         This function will search email match the criteria.
         """
@@ -49,13 +49,14 @@ class ZMailAPI():
         print newsletters_url
         if msg.is_multipart() or not newsletters_url:
             logging.error("Process Failed, this is possible not a newsletter.")
+            self.mail.store(mail_id, '+FLAGS', '(SEEN)')
             return None
 
         newsletter['sender'] = email.utils.parseaddr(msg['from'])
         newsletter['subject'] = msg['subject']
         newsletter['header'] = json.dumps(dict(msg.items()))
         newsletter['url'] = newsletters_url
-
+        self.mail.store(mail_id, '+FLAGS', '(SEEN)')
         return newsletter
  
     def fetch(self, mail_id):
