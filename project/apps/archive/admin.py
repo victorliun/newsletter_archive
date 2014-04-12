@@ -2,7 +2,6 @@
 archive App: admins
 """
 from django.contrib import admin
-
 from .models import *
 from .forms import *
 
@@ -50,6 +49,15 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
         queryset.update(status='5')
     make_reviewed.short_description = "Mark selected newsletters as reviewed"
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """
+        This will initial added_by field to the current logined user.
+        """
+        formfield = super(NewsletterArchiveWIPAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == "added_by" and kwargs['request'].user:
+            formfield.initial = kwargs['request'].user.id
+        return formfield
+
 class NewsletterTagAdmin(admin.ModelAdmin):
     """
     Admin for NewsletterTag
@@ -80,6 +88,14 @@ class CompanyDetailAdmin(admin.ModelAdmin):
     list_display = ['company_name', 'domain_names', 'subdomain_names',  'company_country']
     form = CompanyDetailForm
 
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        """
+        This will initial added_by field to the current logined user.
+        """
+        formfield = super(CompanyDetailAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name == "added_by" and kwargs['request'].user:
+            formfield.initial = kwargs['request'].user.id
+        return formfield
 
 # Register your models here.
 admin.site.register(NewsletterArchive, NewsletterArchiveAdmin)

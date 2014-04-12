@@ -63,7 +63,6 @@ def mv_reviewed_newsletter():
         NewsletterArchive.objects.create(
             subject=newsletter.subject,
             sender=newsletter.sender,
-            header=newsletter.header,
             company=newsletter.company,
             added_by=newsletter.added_by,
             cloudinary_image_url=newsletter.cloudinary_image_url,
