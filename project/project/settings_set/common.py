@@ -185,3 +185,51 @@ LOGGING = {
     }
 }
 
+# celery config
+import djcelery
+ 
+from celery.schedules import crontab
+ 
+djcelery.setup_loader()
+ 
+#BROKER_URL = "redis://localhost:6379/0"
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_RESULT_BACKEND = "database"
+CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
+CELERYBEAT_PIDFILE = '/tmp/celerybeat.pid'
+CELERYBEAT_SCHEDULE = {
+    #uncomment below to let test run every minute
+    #'test':{
+    #    'task':"apps.archive.tasks.test",
+    #    'schedule':crontab(minute='*', hour='*/'), # run every minute
+    #},
+    'get_newsletters':{
+        'task':"apps.archive.utils.get_newsletters",
+        'schedule':crontab(minute=0, hour='*/2'), # run every two hours
+    },
+    "get_images":{
+        'task':"apps.archive.utils.save_newsletter_screenshot",
+        'schedule':crontab(minute=0, hour='*/3'),# run every three hours
+    },
+    "upload_images":{
+        'task':"apps.archive.utils.upload_images_to_cloudinary",
+        'schedule':crontab(minute=0, hour='*/5'), # run every five hours
+    },
+    "mv_newsletters":{
+        'task':"apps.archive.utils.mv_reviewed_newsletter",
+        'schedule':crontab(minute=0, hour=1), # run every day at 1am.
+    },
+       
+}
+
+#config your gmail account here
+GMAIL_ACCOUNT="yourgmailaccount"
+GMAIL_PSD="yourgmailpassword"
+
+#Config your cloudinay here
+CLOUDINARY_CONFIG = {
+    'cloud_name': "newsletterarchive-com", 
+    'api_key': "699949349871494", 
+    'api_secret': "Ubz03tkF2HkWJpK_tFj5wlo-InE" ,
+}
+

@@ -6,6 +6,7 @@ More info go to.http://cloudinary.com/documentation/django_integration#getting_s
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+from django.conf import settings
 
 class CloudinaryAPI():
     """
@@ -19,11 +20,7 @@ class CloudinaryAPI():
         Initialize API
         Config your cloudinary here with your cloud_name, api_key and  api_secret
         """
-        self.config = cloudinary.config(
-            cloud_name = "newsletterarchive-com", 
-            api_key = "699949349871494", 
-            api_secret = "Ubz03tkF2HkWJpK_tFj5wlo-InE" 
-        )
+        self.config = cloudinary.config(**settings.CLOUDINARY_CONFIG)
         self.api = cloudinary.api
         self.uploader = cloudinary.uploader
 

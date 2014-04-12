@@ -1,12 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
-from apps.archive.models import NewsletterArchiveWIP, CompanyDetail
-from django.contrib.auth.models import User
+from apps.archive.utils import get_newsletters
 import logging
-
-from apis.mail_api import ZMailAPI
-
-automator = User.objects.get_or_create(username='automator')[0]
+from django.conf import settings
 
 class Command(BaseCommand):
     """
@@ -33,39 +29,10 @@ class Command(BaseCommand):
         check options. login to count
         save new newsletters
         """
-        initial = options.get("initial")
+        initial = options.get("initial", False)
         gmail_accout = options.get("gmail_accout")
         password = options.get("password")
         logging.warning(gmail_accout)
         logging.warning(password)
 
-        try:
-            api = ZMailAPI(gmail_accout,password)
-        except Exception, err:
-            raise CommandError(err)
-
-        api.select()
-        if initial:
-            reps, data = api.search("(ALL)")
-        else:
-            resp, data = api.search("(UNSEEN)")
-        
-        mail_ids = data[0].split() #extract email id from response
-        for mail_id in mail_ids:
-            newsletter_info =  api.process_email(mail_id)
-            if newsletter_info:
-                newsletter, status = NewsletterArchiveWIP.objects.get_or_create(
-                    subject=newsletter_info['subject'],
-                    sender=newsletter_info['sender'][1],
-                    header=newsletter_info['header'],
-                    url=newsletter_info['url'],
-                    added_by=automator,
-                    )
-
-                # search company if exists in our table.
-                company_domain = newsletter_info['sender'][1].split('@')[1]
-                company = CompanyDetail.objects.filter(domain_names__icontains=company_domain)
-                if company.count() == 1:
-                    newsletter.company = company[0]
-                    newsletter.save()
-                print "store:%s" %newsletter
+        get_newsletters(gmail_accout, password, initial)

@@ -1,14 +1,16 @@
 """
 Archive APP: utils.
 """
-
-from .models import NewsletterArchiveWIP, NewsletterArchive
 from django.conf import settings
 import logging 
 import hashlib
+from apps.archive.models import NewsletterArchiveWIP, CompanyDetail, NewsletterArchive
+from django.contrib.auth.models import User
 
+from apis.mail_api import ZMailAPI
 from apis.phantomjs_api import PhantomJSAPI
 from apis.cloudinary_api import CloudinaryAPI
+
 
 def save_newsletter_screenshot():
     """
@@ -16,6 +18,7 @@ def save_newsletter_screenshot():
     send the newsletter url to phantomjs and save the screenshot. After that, it update these newsletters
     stauts to 3(Image received from PhantonJS), or 2(Image sent to PhantonJS) if no image saved.
     """
+    print "Get newsletter webpage screenshot"
     new_newsletters = NewsletterArchiveWIP.objects.filter(status='1')
     phantomjs_image_path = "/images/phantomjs/"
     phantomjs_api = PhantomJSAPI()
@@ -39,6 +42,7 @@ def upload_images_to_cloudinary():
     status '3':Image received from PhantonJS, upload those images to cloudinary and save image_id and image_url
     which received from cloudinary. then update those newsletters status to 4(Uploaded on Cloudinary)
     """
+    print "upload newsletter images to cloudinary"
     newsletters = NewsletterArchiveWIP.objects.filter(status='3')
     cloudinay_api = CloudinaryAPI()
 
@@ -57,15 +61,50 @@ def mv_reviewed_newsletter():
     This function will pick up all newsletter from NewsletterArchiveWIP with status '5':reviewed by admin/editor
     mv it to NewsletterArchive model.
     """
-
+    print "start publish newsletters"
     newsletters = NewsletterArchiveWIP.objects.filter(status='5')
     for newsletter in newsletters:
-        NewsletterArchive.objects.create(
+        NewsletterArchive.objects.get_or_create(
             subject=newsletter.subject,
             sender=newsletter.sender,
             company=newsletter.company,
             added_by=newsletter.added_by,
             cloudinary_image_url=newsletter.cloudinary_image_url,
             cloudinary_image_id=newsletter.cloudinary_image_id,
-            status='6'
+            status='6',
         )
+    newsletters.update(status='6')
+
+def get_newsletters(gmail_account=settings.GMAIL_ACCOUNT, password=settings.GMAIL_PSD, initial=False):
+    """
+    this function will pick newsletters from an email box. Account sets to defualt gmail account in settings
+        > 
+    """
+    print "search newsletter in inbox"
+    automator = User.objects.get_or_create(username='automator')[0]
+    api = ZMailAPI(gmail_account, password)
+    api.select()
+    if initial:
+        reps, data = api.search("(ALL)")
+    else:
+        resp, data = api.search("(UNSEEN)")
+    
+    mail_ids = data[0].split() #extract email id from response
+    for mail_id in mail_ids:
+        newsletter_info =  api.process_email(mail_id)
+        if newsletter_info:
+            newsletter, status = NewsletterArchiveWIP.objects.get_or_create(
+                subject=newsletter_info['subject'],
+                sender=newsletter_info['sender'][1],
+                header=newsletter_info['header'],
+                url=newsletter_info['url'],
+                added_by=automator,
+                )
+
+            # search company if exists in our table.
+            company_domain = newsletter_info['sender'][1].split('@')[1]
+            company = CompanyDetail.objects.filter(domain_names__icontains=company_domain)
+            if company.count() == 1:
+                newsletter.company = company[0]
+                newsletter.save()
+            print "store:%s" %newsletter
