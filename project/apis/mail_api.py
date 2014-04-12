@@ -44,17 +44,18 @@ class ZMailAPI():
         """
         newsletter = {}
         msg = self.fetch(mail_id)
-
-        newsletters_url = self.get_newsletter_url(msg)
-        print newsletters_url
-        if msg.is_multipart() or not newsletters_url:
-            logging.error("Process Failed, this is possible not a newsletter.")
-            self.mail.store(mail_id, '+FLAGS', '(SEEN)')
-            return None
-
         newsletter['sender'] = email.utils.parseaddr(msg['from'])
         newsletter['subject'] = msg['subject']
-        newsletter['header'] = json.dumps(dict(msg.items()))
+        newsletter['header'] = json.dumps(dict(msg.items()), ensure_ascii=False)
+        newsletters_url = self.get_newsletter_url(msg)
+        print "Process email:id:%s, sender:%s, subject:%s" % (mail_id, newsletter['sender'],
+            newsletter['subject'])
+        print "newsletter url: %s", newsletters_url
+        if msg.is_multipart() or not newsletters_url or len(newsletters_url) > 200:
+            logging.error("Process Failed, this may not be a newsletter.")
+            return None
+
+        
         newsletter['url'] = newsletters_url
         self.mail.store(mail_id, '+FLAGS', '(SEEN)')
         return newsletter
@@ -91,12 +92,21 @@ class ZMailAPI():
         ht = re.sub('=3D', '=', htm)
         soup = BeautifulSoup(ht)
         newsletters_link_text_pa = re.compile("view.*?(it|email).*?(browser|webpage)", re.IGNORECASE)
-        res = soup.findAll('a', text=newsletters_link_text_pa)
-        
+        # the url link text to newsletter may be 'click here'
+        click_here_pa = re.compile(r'click here', re.IGNORECASE) 
+        res = soup.findAll('a', text=newsletters_link_text_pa)        
         for tag in res:
             if tag.attrs['href']:
                 # consider this is the url to webpage newsletter.
                 return tag.attrs['href']
+        res_click_here = soup.findAll('a', text=click_here_pa)
+        for label in res_click_here:
+            parent = label.find_parent()
+            if parent.text.lower().find('view') != -1:
+                #In this case, we found view .* click here. That is more like a newsletter than only consider 'click here'
+                if label.attrs['href']:
+                    # consider this is the url to webpage newsletter.
+                    return label.attrs['href']
         return None
 
     def logout(self):

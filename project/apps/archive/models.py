@@ -157,7 +157,7 @@ class NewsletterArchiveWIP(models.Model):
     cloudinary_image_id = models.CharField(max_length=40, blank=True, null=True)
     status = models.CharField(max_length='1', choices=NEWSLETTER_ARCHIVE_STATUS, default='1')
     newsletter_tags = models.CharField(max_length=255)
-    url = models.URLField(max_length=255)
+    url = models.URLField()
     image_path_from_phantomjs = models.CharField(max_length=80, blank=True)
     reviewed = models.BooleanField(default=False)
 
