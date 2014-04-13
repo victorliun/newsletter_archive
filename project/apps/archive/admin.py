@@ -62,11 +62,15 @@ class NewsletterTagAdmin(admin.ModelAdmin):
     """
     Admin for NewsletterTag
     """
-    list_display = ['name', 'newsletter', 'from_company']
-    readonly_fields = ('name', 'newsletter', 'from_company')
+    list_display = ['name', 'newsletter_name', 'newsletter_date']
+    readonly_fields = ('name', 'newsletter', 'newsletter_date')
 
     def has_add_permission(self, request):
         return False
+
+    def newsletter_name(self, obj):
+        return obj.newsletter.subject
+    newsletter_name.short_description = 'newsletter'
 
 class CompanySubdomainAdmin(admin.ModelAdmin):
     """

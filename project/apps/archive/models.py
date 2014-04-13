@@ -60,18 +60,14 @@ class CompanyDetail(models.Model):
         for subdomain in self.subdomains:
             if subdomain and not CompanySubdomain.objects.filter(subdomain__iexact=subdomain).count():
                 CompanySubdomain.objects.create(subdomain=subdomain, company=self)
-
-        for tag in self.tags:
-            if not NewsletterTag.objects.filter(name__iexact=tag).count():
-                NewsletterTag.objects.create(from_company=self, name=tag)
-    
+        
     @property
     def domains(self):
         """
         Return a list of domains. domain_names field is a comma seperated string.
         """
 
-        return map(lambda x: x.strip(), self.domain_names.split(','))
+        return filter(None, map(lambda x: x.strip(), self.domain_names.split(',')))
 
     @property
     def subdomains(self):
@@ -79,7 +75,7 @@ class CompanyDetail(models.Model):
         Return a list of subdomains. subdomain_names field is a comma seperated string.
         """
         if self.subdomain_names:
-            return map(lambda x: x.strip(), self.subdomain_names.split(','))        
+            return filter(None, map(lambda x: x.strip(), self.subdomain_names.split(',')))
         else:
             return []
 
@@ -172,7 +168,7 @@ class NewsletterArchiveWIP(models.Model):
         """
         return a list of tags
         """
-        return map(lambda x: x.strip(), self.newsletter_tags.split(',')) 
+        return filter(None, map(lambda x: x.strip(), self.newsletter_tags.split(',')))
 
 
     def save(self, *args, **kwargs):
@@ -181,9 +177,14 @@ class NewsletterArchiveWIP(models.Model):
         """
         
         super(NewsletterArchiveWIP, self).save(*args, **kwargs)
+        # save tags of this newsletter to newsletter tags table
         for tag in self.tags:
-            if not NewsletterTag.objects.filter(name__iexact=tag).count():
-                NewsletterTag.objects.create(newsletter=self, name=tag)
+            NewsletterTag.objects.get_or_create(newsletter=self, name=tag, newsletter_date=self.publish_date)
+        # save tags of company of this newsletter to newsletter tags table
+        if self.company is not None:
+            for tag in self.company.tags:
+                NewsletterTag.objects.get_or_create(newsletter=self, name=tag, newsletter_date=self.publish_date)
+
 
     class Meta:
         verbose_name_plural = 'Newsletter archive-wips'
@@ -197,15 +198,18 @@ class NewsletterTag(models.Model):
         > name: tag's name, Must unique
         > newsletter: where is this tag from 
     """
-    name = models.CharField(max_length=40, null=False, unique=True)   
+    name = models.CharField(max_length=40, null=False, unique=False)   
     newsletter = models.ForeignKey(NewsletterArchiveWIP, null=True)
-    from_company = models.ForeignKey(CompanyDetail, null=True)
+    newsletter_date = models.DateField()
     
     def __unicode__(self):
         """
         Return a string as the description of this tag.
         """
-        return u"Tag: %s" %self.name
+        return u"Tag: %s: Newsletter: %s" %(self.name, self.newsletter)
+
+    class Meta:
+        unique_together = (("name", "newsletter"),)
 
 
 class CompanyStatstistics(models.Model):
