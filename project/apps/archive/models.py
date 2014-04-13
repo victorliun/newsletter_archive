@@ -85,7 +85,7 @@ class CompanyDetail(models.Model):
         Return a list of domains. domain_names field is a comma seperated string.
         """
 
-        return map(lambda x: x.strip(), self.company_tags.split(','))
+        return filter(None, map(lambda x: x.strip(), self.company_tags.split(',')))
 
 #NEWSLETTER_ARCHIVE_STATUS indicates each status of newsletter archive, different newsletter will 
 #be processed by diffirent jobs.
