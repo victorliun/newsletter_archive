@@ -6,6 +6,7 @@ import logging
 import Queue
 import threading
 import hashlib
+import time
 from apps.archive.models import NewsletterArchiveWIP, CompanyDetail, NewsletterArchive
 from django.contrib.auth.models import User
 
@@ -149,7 +150,7 @@ def save_offline_newsletter_to_mongodb():
     for newsletter in newsletters:
         folder_path, index_name = save_newsletter_offline(newsletter.url)
         print folder_path, index_name
-
+        time.sleep(2)
         newsletter_files = []
         index_id = None # index.html id
 
