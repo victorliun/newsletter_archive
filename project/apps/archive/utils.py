@@ -3,13 +3,20 @@ Archive APP: utils.
 """
 from django.conf import settings
 import logging 
+import Queue
+import threading
 import hashlib
 from apps.archive.models import NewsletterArchiveWIP, CompanyDetail, NewsletterArchive
 from django.contrib.auth.models import User
 
+from subprocess import Popen
 from apis.mail_api import ZMailAPI
 from apis.phantomjs_api import PhantomJSAPI
 from apis.cloudinary_api import CloudinaryAPI
+from pymongo import MongoClient
+from os import listdir
+import gridfs
+
 
 
 def save_newsletter_screenshot():
@@ -108,3 +115,56 @@ def get_newsletters(gmail_account=settings.GMAIL_ACCOUNT, password=settings.GMAI
                 newsletter.company = company[0]
                 newsletter.save()
             print "store:%s" %newsletter
+
+
+def save_newsletter_offline(newsletter_url):
+    """
+    This will save newsletter offline as a package including images, css, js.
+    It saves the whole package to the folder
+    """
+
+    folder_name = hashlib.md5(newsletter_url).hexdigest()
+    folder_path = settings.MEDIA_ROOT + "/newsletter_downloads/" + folder_name
+    file_name = newsletter_url.rsplit('/', 1)[0]
+    command = "wget"
+    args = " -E -H -k -K -p -nd -P %s -e robots=off -o logwget.txt %s" %(folder_path, newsletter_url)
+    args = args.split(';')[0] # cut off string after ; if any.
+    #subp = check_call(command + args, shell=True)
+    proc = Popen(command + args, shell=True)
+    proc.communicate() # wait until finish
+    return folder_path, file_name
+
+
+def save_offline_newsletter_to_mongodb():
+    """
+    This function will save offline newsletter html including images css and js file to 
+    mongodb
+    """
+    db = MongoClient().newsletter
+    archive = db.archive
+    fs = gridfs.GridFS(db, 'archive')
+
+    newsletters = NewsletterArchiveWIP.objects.filter(saved_mongo=False)
+
+    for newsletter in newsletters:
+        folder_path, index_name = save_newsletter_offline(newsletter.url)
+        print folder_path, index_name
+
+        newsletter_files = []
+        index_id = None # index.html id
+
+        for file_name in listdir(folder_path):
+            file_id = fs.put(folder_path+"/"+file_name)
+            newsletter_files.append(file_id)
+            if file_name == index_name+".html":
+                index_id = file_id
+        archive.insert({
+            "subject":newsletter.subject,
+            "files": newsletter_files,
+            "index": index_id, 
+            })
+
+        print "saving %s to mongodb" %newsletter.subject
+        newsletter.saved_mongo=True
+        newsletter.save()
+

@@ -219,6 +219,10 @@ CELERYBEAT_SCHEDULE = {
         'task':"apps.archive.utils.mv_reviewed_newsletter",
         'schedule':crontab(minute=0, hour=1), # run every day at 1am.
     },
+    "save_offline_newsletter_to_mongodb":{
+        'task':"apps.archive.utils.mv_reviewed_newsletter",
+        'schedule':crontab(minute=0, hour=7), # run every day at 7am.
+    },
        
 }
 

@@ -142,6 +142,7 @@ class NewsletterArchiveWIP(models.Model):
         > url: the original url of newsletter
         > image_path_from_phantomjs: the temprary path where save the image
         > reviewed: if this record reviewed by editor or admin.
+        > saved_mongo: indicate whether it saved to mongodb or not.
     """
     subject = models.CharField(max_length=255)
     publish_date = models.DateField(auto_now_add=True)
@@ -156,6 +157,7 @@ class NewsletterArchiveWIP(models.Model):
     url = models.URLField()
     image_path_from_phantomjs = models.CharField(max_length=80, blank=True)
     reviewed = models.BooleanField(default=False)
+    saved_mongo = models.BooleanField(default=False)
 
     def __unicode__(self):
         """
