@@ -19,7 +19,7 @@ How to setup
     sudo apt-get install python-virtualenv
     sudo apt-get install nodejs
     sudo apt-get install npm
-    sudo apt-get install phantomjs
+    npm install -g phantomjs
     sudo apt-get install rabbitmq-server
     sudo apt-get install mysql-server
     sudo apt-get install python-mysqldb
@@ -36,12 +36,11 @@ How to setup
     ln -s env/bin/activate
     source activate
     pip install -r requirements.text —download-cache=~/.pip-cache
-    mysql.server start
+    mysqld start
     ./manage.py syncdb
     ./manage.py schemamigration archive --auto --update
     ./manage.py migrate archive 
     ./manage.py migrate
-    ./manage.py runserver # go to localhost:8000 test
 
 4.  config server:
     # change settings in uwsgi.ini
@@ -52,6 +51,14 @@ How to setup
 5. Commands:
     #run celery
     cd newsletter_archive/project
-    ./manage.py celery worker
-    ./manage.py celerybeat
-    ./manage.py help
+    ./manage.py celery worker -f celery_log.txt
+    ./manage.py celerybeat -f celerybeat_log.txt
+
+6. Start server:
+    cd newsletter_archive/project
+    uwsgi uwsgi.ini &
+    # restart,
+    uwsgi --reload uwsgi-master.pid
+    # stop
+    uwsgi --stop uwsgi-master.pid
+
