@@ -23,4 +23,6 @@ class PhantomJSAPI():
         """
 
         self.driver.get(url)
-        return self.driver.save_screenshot(save_path)
+        res = self.driver.save_screenshot(save_path)
+        self.driver.quit()
+        return res
