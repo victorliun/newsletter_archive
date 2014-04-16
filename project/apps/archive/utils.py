@@ -141,6 +141,7 @@ def save_offline_newsletter_to_mongodb():
     This function will save offline newsletter html including images css and js file to 
     mongodb
     """
+    print "Start save newsletter offline and save it to  mongodb"
     db = MongoClient().newsletter
     archive = db.archive
     fs = gridfs.GridFS(db, 'archive')
