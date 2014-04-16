@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models import permalink
 from django.utils.text import slugify
+from datetime import datetime
 
 from lxml import etree
 from django_countries.fields import CountryField
@@ -145,7 +146,7 @@ class NewsletterArchiveWIP(models.Model):
         > saved_mongo: indicate whether it saved to mongodb or not.
     """
     subject = models.CharField(max_length=255)
-    publish_date = models.DateField(auto_now_add=True)
+    publish_date = models.DateField(default=datetime.now)
     sender = models.EmailField()
     header = models.TextField()
     company = models.ForeignKey(CompanyDetail, related_name="wip_company", null=True, blank=True)
