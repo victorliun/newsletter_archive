@@ -31,8 +31,7 @@ class CloudinaryAPI():
         """
         default_options = {
             'crop':'limit',
-            'width':2000,
-            'height':2000,
+            'width':1440,
             'eager':[
                 { 'width': 200, 'height': 200, 
                   'crop': 'thumb', 'gravity': 'face',
