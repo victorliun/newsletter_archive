@@ -31,7 +31,7 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
         'cloudinary_image_id', 'image_path_from_phantomjs', 'saved_mongo')
     list_filter = ('status',)
     list_display = ['subject', 'get_company', 'status', 'image_path_from_phantomjs', 'cloudinary_image_url', 
-        'cloudinary_image_id', 'added_by']
+        'cloudinary_image_id', 'added_by', 'publish_date']
     actions = ["make_reviewed"]
 
     def get_company(self, obj):
