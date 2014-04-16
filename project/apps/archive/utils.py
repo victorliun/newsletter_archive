@@ -145,7 +145,7 @@ def save_offline_newsletter_to_mongodb():
     archive = db.archive
     fs = gridfs.GridFS(db, 'archive')
 
-    newsletters = NewsletterArchiveWIP.objects.filter(saved_mongo=False)
+    newsletters = NewsletterArchiveWIP.objects.filter(status='6', saved_mongo=False)
 
     for newsletter in newsletters:
         folder_path, index_name = save_newsletter_offline(newsletter.url)
