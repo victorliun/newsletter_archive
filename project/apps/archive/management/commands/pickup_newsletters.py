@@ -17,9 +17,9 @@ class Command(BaseCommand):
     
     option_list = BaseCommand.option_list + (
     make_option('--gmail-accout', action='store', dest='gmail_accout',
-        default=None, help='gmail account to connect'),
+        default='', help='gmail account to connect'),
     make_option('--password', action="store", dest="password",
-        default=None, help="The password of your account"),
+        default='', help="The password of your account"),
     make_option('--initial', action="store", dest="initial",
         default=False, help="Run first time for this account?"),
     )
@@ -30,9 +30,11 @@ class Command(BaseCommand):
         save new newsletters
         """
         initial = options.get("initial", False)
-        gmail_accout = options.get("gmail_accout", settings.GMAIL_ACCOUNT)
-        password = options.get("password", settings.GMAIL_PSD)
-        logging.warning(gmail_accout)
+        gmail_account = options.get("gmail_accout")
+	gmail_account = gmail_account or settings.GMAIL_ACCOUNT
+        password = options.get("password")
+	password = password or settings.GMAIL_PSD
+        logging.warning(gmail_account)
         logging.warning(password)
 
-        get_newsletters(gmail_accout, password, initial)
+        get_newsletters(gmail_account, password, initial)
