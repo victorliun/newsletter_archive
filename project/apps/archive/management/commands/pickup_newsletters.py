@@ -30,8 +30,8 @@ class Command(BaseCommand):
         save new newsletters
         """
         initial = options.get("initial", False)
-        gmail_accout = options.get("gmail_accout")
-        password = options.get("password")
+        gmail_accout = options.get("gmail_accout", settings.GMAIL_ACCOUNT)
+        password = options.get("password", settings.GMAIL_PSD)
         logging.warning(gmail_accout)
         logging.warning(password)
 
