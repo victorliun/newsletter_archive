@@ -3,6 +3,7 @@ API: phantomjs
 """
 
 from selenium import webdriver
+import logging
 
 class PhantomJSAPI():
     """
@@ -11,8 +12,10 @@ class PhantomJSAPI():
     """
 
     def __init__(self):
-        self.driver = webdriver.PhantomJS()
-
+        try:
+            self.driver = webdriver.PhantomJS()
+        except WebDriverException, err:
+            logging.error(err)
     def get_website_screenshot(self, url, save_path):
         """
         This method will save the website screenshot as image,
@@ -24,5 +27,7 @@ class PhantomJSAPI():
 
         self.driver.get(url)
         res = self.driver.save_screenshot(save_path)
-        self.driver.quit()
         return res
+    
+    def __del__(self):
+	self.driver.quit()
