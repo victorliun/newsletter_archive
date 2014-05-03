@@ -77,4 +77,5 @@ class NewsletterArchiveWIPForm(forms.ModelForm):
             'newsletter_tags': forms.TextInput(attrs={
                 'placeholder': 'Multiple tags must be separated by comma',
                 'style': "width:300px;",}),
+            'cloudinary_image_url':forms.TextInput(attrs={'disabled':'disabled'})
         }

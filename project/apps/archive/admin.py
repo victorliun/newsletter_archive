@@ -27,12 +27,13 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
     admin for NewsletterArchiveWIP
     """
     form = NewsletterArchiveWIPForm
-    readonly_fields = ('status', 'cloudinary_image_url', 'header',
+    readonly_fields = ('status', 'show_cloudinary_url', 'header',
         'cloudinary_image_id', 'image_path_from_phantomjs', 'saved_mongo')
     list_filter = ('status',)
-    list_display = ['subject', 'get_company', 'status', 'image_path_from_phantomjs', 'cloudinary_image_url', 
+    list_display = ['subject', 'get_company', 'status', 'image_path_from_phantomjs', 'show_cloudinary_url', 
         'cloudinary_image_id', 'added_by', 'publish_date']
     actions = ["make_reviewed"]
+    exclude = ('timestamp',)
 
     def get_company(self, obj):
         if obj.company:
@@ -40,6 +41,10 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
         else:
             return None
     get_company.short_description = 'company'
+
+    def show_cloudinary_url(self, obj):
+        return '<a href="%s" target="_new">%s</a>' % (obj.cloudinary_image_url, obj.cloudinary_image_url)
+    show_cloudinary_url.allow_tags = True
 
     def make_reviewed(modeladmin, request, queryset):
         """
@@ -56,6 +61,8 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
         formfield = super(NewsletterArchiveWIPAdmin, self).formfield_for_dbfield(db_field, **kwargs)
         if db_field.name == "added_by" and kwargs['request'].user:
             formfield.initial = kwargs['request'].user.id
+        if db_field.name == 'company':
+            formfield.choices = formfield.choices
         return formfield
 
 class NewsletterTagAdmin(admin.ModelAdmin):
@@ -108,4 +115,5 @@ admin.site.register(CompanyDetail, CompanyDetailAdmin)
 admin.site.register(NewsletterTag, NewsletterTagAdmin)
 admin.site.register(CompanyStatstistics)
 admin.site.register(CompanySubdomain, CompanySubdomainAdmin)
+admin.site.register(Industry)
 

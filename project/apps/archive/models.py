@@ -12,6 +12,17 @@ from datetime import datetime
 from lxml import etree
 from django_countries.fields import CountryField
 
+
+class Industry(models.Model):
+    """
+    Model of Industry, for company.
+    """
+    description = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.description
+        
+
 class CompanyDetail(models.Model):
     """
     Model of table: CompanyDetail.
@@ -31,6 +42,7 @@ class CompanyDetail(models.Model):
     
     company_name = models.CharField(max_length=20)
     company_country = CountryField()
+    industry = models.ForeignKey(Industry, blank=True, null=True)
     domain_names = models.CharField(max_length=255)
     subdomain_names = models.CharField(max_length=255, blank=True)
     company_tags = models.CharField(max_length=255)
@@ -39,7 +51,7 @@ class CompanyDetail(models.Model):
     subscribe_url = models.URLField(blank=True)
     unsubscribe_email = models.EmailField(blank=True)
     slug = models.SlugField(max_length=255, blank=True, null=True)
-    
+
     def __unicode__(self):
         """
         Returns the company id, name and domains.
@@ -131,7 +143,7 @@ class NewsletterArchiveWIP(models.Model):
     """
     Model Name: NewsletterArchiveWIP, store follow information of a newsletter archive.
         > subject: newsletter subject
-        > publish_date: On which date this newsletter archived
+        > publish_date: On which date this newsletter Published
         > sender: email address of sender
         > header: newsletter email's head information
         > company: Which company this newsletter come from
@@ -144,6 +156,7 @@ class NewsletterArchiveWIP(models.Model):
         > image_path_from_phantomjs: the temprary path where save the image
         > reviewed: if this record reviewed by editor or admin.
         > saved_mongo: indicate whether it saved to mongodb or not.
+        > timestamp: when this record added to db
     """
     subject = models.CharField(max_length=255)
     publish_date = models.DateField(default=datetime.now)
@@ -159,6 +172,7 @@ class NewsletterArchiveWIP(models.Model):
     image_path_from_phantomjs = models.CharField(max_length=80, blank=True)
     reviewed = models.BooleanField(default=False)
     saved_mongo = models.BooleanField(default=False)
+    timestamp = models.DateField(default=datetime.now())
 
     def __unicode__(self):
         """
