@@ -6,6 +6,7 @@ import re
 import json
 import logging
 import imaplib, email
+import datetime
 
 from email.parser import HeaderParser
 from bs4 import BeautifulSoup
@@ -47,6 +48,7 @@ class ZMailAPI():
         newsletter['sender'] = email.utils.parseaddr(msg['from'])
         newsletter['subject'] = msg['subject']
         newsletter['header'] = json.dumps(dict(msg.items()), ensure_ascii=False)
+        newsletter['publish_date'] = datetime.strptime(msg['date'], "%a, %d %b %Y %H:%M:%S +0800")
         newsletters_url = self.get_newsletter_url(msg)
         print "Process email:id:%s, sender:%s, subject:%s" % (mail_id, newsletter['sender'],
             newsletter['subject'])
@@ -91,7 +93,8 @@ class ZMailAPI():
         htm = re.sub("=0A|=\r\n|\r\n",'',shit_html)
         ht = re.sub('=3D', '=', htm)
         soup = BeautifulSoup(ht)
-        newsletters_link_text_pa = re.compile("view.*?(it|email).*?(browser|webpage)", re.IGNORECASE)
+        #newsletters_link_text_pa = re.compile("view.*?(it|email).*?(browser|webpage|see it online|web version)", re.IGNORECASE)
+	newsletters_link_text_pa = re.compile("(view.*?(it|email).*?(browser|webpage))|(Web version)|(SEE IT ONLINE)", re.IGNORECASE)
         # the url link text to newsletter may be 'click here'
         click_here_pa = re.compile(r'click here', re.IGNORECASE) 
         res = soup.findAll('a', text=newsletters_link_text_pa)        
