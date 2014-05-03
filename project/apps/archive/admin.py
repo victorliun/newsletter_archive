@@ -62,7 +62,11 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
         if db_field.name == "added_by" and kwargs['request'].user:
             formfield.initial = kwargs['request'].user.id
         if db_field.name == 'company':
-            formfield.choices = formfield.choices
+            myfield_choices_cache = getattr(kwargs['request'], 'myfield_choices_cache', None)
+            if myfield_choices_cache is not None:
+                formfield.choices = myfield_choices_cache
+            else:
+                kwargs['request'].myfield_choices_cache = formfield.choices
         return formfield
 
 class NewsletterTagAdmin(admin.ModelAdmin):
