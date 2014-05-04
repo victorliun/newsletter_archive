@@ -32,7 +32,7 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     list_display = ['subject', 'get_company', 'status', 'image_path_from_phantomjs', 'show_cloudinary_url', 
         'cloudinary_image_id', 'added_by', 'publish_date']
-    actions = ["make_reviewed"]
+    actions = ["delete_model", "make_reviewed"]
     exclude = ('timestamp',)
 
     def get_company(self, obj):
@@ -68,6 +68,17 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
             else:
                 kwargs['request'].myfield_choices_cache = formfield.choices
         return formfield
+
+    def get_actions(self, request):
+        actions = super(NewsletterArchiveWIPAdmin, self).get_actions(request)
+        del actions['delete_selected']
+        return actions
+
+    def delete_model(modeladmin, request, queryset):
+        for obj in queryset:
+            obj.delete()
+    delete_model.short_description = "Delete selected models"
+
 
 class NewsletterTagAdmin(admin.ModelAdmin):
     """

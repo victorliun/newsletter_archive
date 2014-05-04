@@ -9,9 +9,11 @@ from django.db.models import permalink
 from django.utils.text import slugify
 from datetime import datetime
 
+import logging
 from lxml import etree
 from django_countries.fields import CountryField
 
+from apis.cloudinary_api import CloudinaryAPI
 
 class Industry(models.Model):
     """
@@ -21,7 +23,8 @@ class Industry(models.Model):
 
     def __unicode__(self):
         return self.description
-        
+    class Meta:
+        verbose_name_plural = 'Industries'
 
 class CompanyDetail(models.Model):
     """
@@ -192,7 +195,6 @@ class NewsletterArchiveWIP(models.Model):
         """
         Save new tags to newslettertag table
         """
-        
         super(NewsletterArchiveWIP, self).save(*args, **kwargs)
         # save tags of this newsletter to newsletter tags table
         for tag in self.tags:
@@ -202,6 +204,15 @@ class NewsletterArchiveWIP(models.Model):
             for tag in self.company.tags:
                 NewsletterTag.objects.get_or_create(newsletter=self, name=tag, newsletter_date=self.publish_date)
 
+    def delete(self, *args, **kwargs):
+        """
+        delete newsletter_archive WIP, also delete the cloudinary image
+        """
+        if self.cloudinary_image_id:
+            c_api = CloudinaryAPI()
+            res = c_api.uploader.destroy(self.cloudinary_image_id)
+            logging.info("deleted %s, %s" %(self.cloudinary_image_id, res)) 
+        super(NewsletterArchiveWIP, self).delete(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Newsletter archive-wips'

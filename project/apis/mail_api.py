@@ -6,7 +6,8 @@ import re
 import json
 import logging
 import imaplib, email
-import datetime
+from dateutil import parser
+from datetime import datetime
 
 from email.parser import HeaderParser
 from bs4 import BeautifulSoup
@@ -48,7 +49,11 @@ class ZMailAPI():
         newsletter['sender'] = email.utils.parseaddr(msg['from'])
         newsletter['subject'] = msg['subject']
         newsletter['header'] = json.dumps(dict(msg.items()), ensure_ascii=False)
-        newsletter['publish_date'] = datetime.strptime(msg['date'], "%a, %d %b %Y %H:%M:%S +0800")
+        try:
+            publish_date = parser.parse(msg['date'])
+        except Exception, exp:
+            publish_date = datetime.now()
+        newsletter['publish_date'] = publish_date
         newsletters_url = self.get_newsletter_url(msg)
         print "Process email:id:%s, sender:%s, subject:%s" % (mail_id, newsletter['sender'],
             newsletter['subject'])

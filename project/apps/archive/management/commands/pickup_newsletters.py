@@ -31,9 +31,9 @@ class Command(BaseCommand):
         """
         initial = options.get("initial", False)
         gmail_account = options.get("gmail_accout")
-	gmail_account = gmail_account or settings.GMAIL_ACCOUNT
+        gmail_account = gmail_account or settings.GMAIL_ACCOUNT
         password = options.get("password")
-	password = password or settings.GMAIL_PSD
+        password = password or settings.GMAIL_PSD
         logging.warning(gmail_account)
         logging.warning(password)
 

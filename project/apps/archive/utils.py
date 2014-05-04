@@ -89,7 +89,7 @@ def get_newsletters(gmail_account=settings.GMAIL_ACCOUNT, password=settings.GMAI
         > 
     """
     print "search newsletter in inbox"
-    automator = User.objects.get_or_create(username='automator')
+    automator = User.objects.get_or_create(username='automator')[0]
     api = ZMailAPI(gmail_account, password)
     api.select()
     if initial:
@@ -106,6 +106,7 @@ def get_newsletters(gmail_account=settings.GMAIL_ACCOUNT, password=settings.GMAI
                 sender=newsletter_info['sender'][1],
                 header=newsletter_info['header'],
                 url=newsletter_info['url'],
+                publish_date=newsletter_info['publish_date'],
                 added_by=automator,
                 )
 

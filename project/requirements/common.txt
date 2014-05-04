@@ -12,3 +12,4 @@ selenium==2.41.0
 cloudinary==1.0.16
 beautifulsoup4==4.3.2
 mongoengine==0.8.7
+python-dateutil==2.2
