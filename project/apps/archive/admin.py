@@ -2,6 +2,8 @@
 archive App: admins
 """
 from django.contrib import admin
+from ajax_select import make_ajax_form
+from ajax_select.admin import AjaxSelectAdmin
 from .models import *
 from .forms import *
 
@@ -22,11 +24,11 @@ class NewsletterArchiveAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False  
 
-class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
+class NewsletterArchiveWIPAdmin(AjaxSelectAdmin):
     """
     admin for NewsletterArchiveWIP
     """
-    form = NewsletterArchiveWIPForm
+    form = make_ajax_form(NewsletterArchiveWIP, {'company': 'company_lookup'}, NewsletterArchiveWIPForm)
     readonly_fields = ('status', 'show_cloudinary_url', 'header',
         'cloudinary_image_id', 'image_path_from_phantomjs', 'saved_mongo','timestamp')
     list_filter = ('status',)
@@ -110,7 +112,7 @@ class CompanyDetailAdmin(admin.ModelAdmin):
     """
     Admin for CompanyDetail
     """
-    list_display = ['company_name', 'domain_names', 'subdomain_names',  'company_country']
+    list_display = ['company_name', 'domain_names', 'subdomain_names', 'industry', 'company_country']
     form = CompanyDetailForm
 
     def formfield_for_dbfield(self, db_field, **kwargs):

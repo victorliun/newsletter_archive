@@ -43,7 +43,7 @@ class CompanyDetail(models.Model):
         > slug: the readable url for each record intead of using record's id
     """
     
-    company_name = models.CharField(max_length=20)
+    company_name = models.CharField(max_length=255)
     company_country = CountryField()
     industry = models.ForeignKey(Industry, blank=True, null=True)
     domain_names = models.CharField(max_length=255)

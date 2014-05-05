@@ -41,6 +41,7 @@ DEFAULT_APPS = (
 THIRD_PART_APPS = (
     'south',
     'djcelery',
+    'ajax_select',
 )
 
 
@@ -228,7 +229,7 @@ CELERYBEAT_SCHEDULE = {
 
 #config your gmail account here
 GMAIL_ACCOUNT="yourgmailaccount"
-GMAIL_PSD="yourgmailpassword"
+GMAIL_PSD="youpassword"
 
 #Config your cloudinay here
 CLOUDINARY_CONFIG = {
@@ -237,3 +238,10 @@ CLOUDINARY_CONFIG = {
     'api_secret': "Ubz03tkF2HkWJpK_tFj5wlo-InE" ,
 }
 
+# define the lookup channels in use on the site
+AJAX_LOOKUP_CHANNELS = {
+    #  simple: search Person.objects.filter(name__icontains=q)
+    'ajax_related_company'  : {'model': 'archive.models.CompanyDetail', 'search_field': 'company_name'},
+    # define a custom lookup channel
+    'company_lookup'   : ('apps.archive.lookups', 'CompanyLookup')
+}
