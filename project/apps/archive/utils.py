@@ -26,10 +26,13 @@ def save_newsletter_screenshot():
     send the newsletter url to phantomjs and save the screenshot. After that, it update these newsletters
     stauts to 3(Image received from PhantonJS), or 2(Image sent to PhantonJS) if no image saved.
     """
-    print "Get newsletter webpage screenshot"
+    print "saving newsletter webpage screenshot"
     new_newsletters = NewsletterArchiveWIP.objects.filter(status='1')
     phantomjs_image_path = "/images/phantomjs/"
     phantomjs_api = PhantomJSAPI()
+    if not phantomjs_api.driver:
+        logging.error("Can't get Phantomjs API.")
+        return False
     for newsletter in new_newsletters:
         file_name = hashlib.md5(newsletter.subject + str(newsletter.publish_date)).hexdigest()
         file_path = "%s%s%s.png" %(settings.MEDIA_ROOT, phantomjs_image_path, file_name)
@@ -101,6 +104,17 @@ def get_newsletters(gmail_account=settings.GMAIL_ACCOUNT, password=settings.GMAI
     for mail_id in mail_ids:
         newsletter_info =  api.process_email(mail_id)
         if newsletter_info:
+            sender = newsletter_info['sender'][1]
+            company_domain = sender.split('@')[1]
+            companys = CompanyDetail.objects.filter(
+                domain_names__icontains=company_domain)
+            if companys:
+                company = companys[0]
+            else:
+                company = CompanyDetail.objects.create(
+                    company_name=company_domain,
+                    domain_names=company_domain,
+                    added_by=automator)
             newsletter, status = NewsletterArchiveWIP.objects.get_or_create(
                 subject=newsletter_info['subject'],
                 sender=newsletter_info['sender'][1],
@@ -108,14 +122,9 @@ def get_newsletters(gmail_account=settings.GMAIL_ACCOUNT, password=settings.GMAI
                 url=newsletter_info['url'],
                 publish_date=newsletter_info['publish_date'],
                 added_by=automator,
+                company=company
                 )
 
-            # search company if exists in our table.
-            company_domain = newsletter_info['sender'][1].split('@')[1]
-            company = CompanyDetail.objects.filter(domain_names__icontains=company_domain)
-            if company.count() == 1:
-                newsletter.company = company[0]
-                newsletter.save()
             print "store:%s" %newsletter
 
 

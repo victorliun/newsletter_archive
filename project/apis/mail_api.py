@@ -99,7 +99,7 @@ class ZMailAPI():
         ht = re.sub('=3D', '=', htm)
         soup = BeautifulSoup(ht)
         #newsletters_link_text_pa = re.compile("view.*?(it|email).*?(browser|webpage|see it online|web version)", re.IGNORECASE)
-	newsletters_link_text_pa = re.compile("(view.*?(it|email).*?(browser|webpage))|(Web version)|(SEE IT ONLINE)", re.IGNORECASE)
+        newsletters_link_text_pa = re.compile("(view.*?(it|email).*?(browser|webpage))|(Web version)|(SEE IT ONLINE)", re.IGNORECASE)
         # the url link text to newsletter may be 'click here'
         click_here_pa = re.compile(r'click here', re.IGNORECASE) 
         res = soup.findAll('a', text=newsletters_link_text_pa)        

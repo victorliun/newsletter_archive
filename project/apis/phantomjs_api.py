@@ -14,8 +14,10 @@ class PhantomJSAPI():
     def __init__(self):
         try:
             self.driver = webdriver.PhantomJS()
-        except WebDriverException, err:
+        except Exception, err:
+            self.driver = None
             logging.error(err)
+
     def get_website_screenshot(self, url, save_path):
         """
         This method will save the website screenshot as image,
@@ -30,4 +32,5 @@ class PhantomJSAPI():
         return res
     
     def __del__(self):
-	self.driver.quit()
+        if self.driver:
+            self.driver.quit()

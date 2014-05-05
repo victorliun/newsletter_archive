@@ -28,12 +28,11 @@ class NewsletterArchiveWIPAdmin(admin.ModelAdmin):
     """
     form = NewsletterArchiveWIPForm
     readonly_fields = ('status', 'show_cloudinary_url', 'header',
-        'cloudinary_image_id', 'image_path_from_phantomjs', 'saved_mongo')
+        'cloudinary_image_id', 'image_path_from_phantomjs', 'saved_mongo','timestamp')
     list_filter = ('status',)
     list_display = ['subject', 'get_company', 'status', 'image_path_from_phantomjs', 'show_cloudinary_url', 
         'cloudinary_image_id', 'added_by', 'publish_date']
     actions = ["delete_model", "make_reviewed"]
-    exclude = ('timestamp',)
 
     def get_company(self, obj):
         if obj.company:
